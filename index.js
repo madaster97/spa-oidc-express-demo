@@ -11,7 +11,7 @@ const bodyParser = require('body-parser');
         token_endpoint_auth_method: 'client_secret_basic',
         response_types: ['code'],
         redirect_uris: [
-            process.env.BASE_URL + '/callback'
+            process.env.BASE_URL
         ]
     });
 
