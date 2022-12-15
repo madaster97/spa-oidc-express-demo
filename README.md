@@ -3,7 +3,7 @@ An example Openid Connect Relying Party where the frontend is a Single-Page App
 
 # Run the Example
 ```
-npm start
+node -r dotenv/config . dotenv_config_path=config/smart-launch.env
 ```
 
 Then open the app on http://localhost:3000

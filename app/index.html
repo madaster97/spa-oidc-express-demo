@@ -7,12 +7,10 @@
     <script src="./index.js"></script>
     <title>cSRF Test</title>
 </head>
-<body onload="setupCSRF()">
-    <h1>SPA CSRF Test</h1>
-    <p id="token">Setting up CSRF Token...</p>
-
-    <button id="test-request" disabled="disabled" onclick="submitRequest()">
-        Submit Stateful Request
+<body onload="checkQuery()">
+    <h1>SPA OAuth 2.0 CSRF Test</h1>
+    <button id="test-request" disabled="disabled" onclick="setupCSRF()">
+        Submit Login Request
     </button>
     <p id="result"></p>
 </body>

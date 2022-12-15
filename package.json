@@ -1,15 +1,16 @@
 {
   "dependencies": {
+    "body-parser": "^1.20.1",
     "debug": "^4.3.4",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
+    "openid-client": "^5.3.1",
     "uuid": "^9.0.0"
   },
   "name": "spa-oidc-express-demo",
   "description": "An example Openid Connect Relying Party where the frontend is a Single-Page App",
   "version": "1.0.0",
   "main": "index.js",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/madaster97/spa-oidc-express-demo/issues"
   },
-  "homepage": "https://github.com/madaster97/spa-oidc-express-demo#readme"
+  "homepage": "https://github.com/madaster97/spa-oidc-express-demo#readme",
+  "devDependencies": {
+    "dotenv": "^16.0.3"
+  }
 }
