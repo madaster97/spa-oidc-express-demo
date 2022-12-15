@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      function setupCSRF() {
+        fetch('http://localhost:3000/get-csrf-token')
+          .then(response => {
+            if (response.status == 200) {
+              const token = document.getElementById('token')
+              const csrf_token = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('XSRF-TOKEN='))
+                ?.split('=')[1]
+              if (!csrf_token) {
+                token.innerText = 'Could not find token in "XSRF-TOKEN" cookie'
+              } else {
+                token.innerText = 'Set token with value ' + csrf_token
+                const button = document.getElementById('test-request')
+                button.removeAttribute('disabled')
+              }
+            } else {
+              return response.json().then(errJson => {
+                throw new Error(JSON.stringify(errJson, null, 2))
+              })
+            }
+          })
+          .catch(err => {
+            const token = document.getElementById('token')
+            token.innerText = 'Error fetching token: ' + err.message
+          })
+      }
+
+      function submitRequest() {
+        const csrf_token = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('XSRF-TOKEN='))
+          ?.split('=')[1]
+        if (!csrf_token) {
+          const result = document.getElementById('result')
+          result.innerText = 'Error finding XSRF-TOKEN cookie'
+        } else {
+          fetch('http://localhost:3000/use-csrf-token', {
+            method: 'POST',
+            headers: {
+              'X-XSRF-TOKEN': csrf_token
+            }
+          })
+            .then(response => {
+              if (response.status == 200) {
+                const result = document.getElementById('result')
+                result.innerText = 'Successful request!'
+              } else {
+                return response.json().then(errJson => {
+                  throw new Error(JSON.stringify(errJson, null, 2))
+                })
+              }
+            })
+            .catch(err => {
+              const result = document.getElementById('result')
+              result.innerText = 'Error sumbitting request: ' + err.message
+            })
+        }
+      }
+    </script>
+    <title>cSRF Test</title>
+  </head>
+  <body onload="setupCSRF()">
+    <h1>SPA CSRF Test</h1>
+    <p id="token">Setting up CSRF Token...</p>
+
+    <button id="test-request" disabled="disabled" onclick="submitRequest()">
+      Submit Stateful Request
+    </button>
+    <p id="result"></p>
+  </body>
+</html>
