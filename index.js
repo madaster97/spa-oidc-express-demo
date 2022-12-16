@@ -39,7 +39,8 @@ const bodyParser = require('body-parser');
         const authorizeRequest = client.authorizationUrl({
             nonce,
             code_challenge,
-            code_challenge_method: 'S256'
+            code_challenge_method: 'S256',
+            state
         })
         req.session.state = state;
         req.session.nonce = nonce;
@@ -65,7 +66,7 @@ const bodyParser = require('body-parser');
         const expectedState = req.session.state;
         const expectedNonce = req.session.nonce;
         const code_verifier = req.session.code_verifier;
-        if (!state || !nonce || !code_verifier) {
+        if (!expectedState || !expectedNonce || !code_verifier) {
             res.status(400).json({
                 error: 'server_error',
                 error_message: 'CSRF token missing from session'

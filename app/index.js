@@ -15,28 +15,28 @@ function checkQuery() {
         params.delete('state');
         status.innerText = 'Found "state" query value ' + state +
             '. Sending authorize response to server...';
-        // fetch('/use-csrf-token', {
-        //     method: 'POST',
-        //     headers: {
-        //         'X-AUTH-STATE': state,
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify(paramsToObject(params))
-        // }).then(response => {
-        //     if (response.status == 200) {
-        //         return response.json().then(tokenSet => {
-        //             const result = document.getElementById('result');
-        //             result.innerText = 'Successful request! TokenSet received: ' + JSON.stringify(tokenSet, null, 2);
-        //         })
-        //     } else {
-        //         return response.json().then(errJson => {
-        //             throw new Error(JSON.stringify(errJson, null, 2))
-        //         })
-        //     }
-        // }).catch(err => {
-        //     const result = document.getElementById('result');
-        //     result.innerText = 'Error sumbitting request: ' + err.message;
-        // });
+        fetch('/use-csrf-token', {
+            method: 'POST',
+            headers: {
+                'X-AUTH-STATE': state,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(paramsToObject(params))
+        }).then(response => {
+            if (response.status == 200) {
+                return response.json().then(tokenSet => {
+                    const status = document.getElementById('status');
+                    status.innerText = 'Successful request! TokenSet received: ' + JSON.stringify(tokenSet, null, 2);
+                })
+            } else {
+                return response.json().then(errJson => {
+                    throw new Error(JSON.stringify(errJson, null, 2))
+                })
+            }
+        }).catch(err => {
+            const status = document.getElementById('status');
+            status.innerText = 'Error sumbitting request: ' + err;
+        });
     } else {
         status.innerText = 'No "state" query string found. Creating new authorize link';
         setupCSRF(status);
