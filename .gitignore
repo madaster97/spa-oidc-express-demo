@@ -70,6 +70,7 @@ typings/
 
 # dotenv environment variables file
 config/*.env
+!config/example.env
 .env
 .env.test
 
