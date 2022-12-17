@@ -2,11 +2,14 @@
 An example Openid Connect Relying Party where the frontend is a Single-Page App
 
 # Run the Example
+First, copy the config/example.env file and add your config.
+Sample runs on redirect_uri http://localhost:3000
+
 ```
-node -r dotenv/config . dotenv_config_path=config/smart-launch.env
+node -r dotenv/config . dotenv_config_path=config/your-config.env
 ```
 
 Then open the app on http://localhost:3000
 
 # Simulate an Attack
-Host the [attack.html](./attack.html) file on another website. The W3C [html try-it](https://www.w3schools.com/html/tryit.asp?filename=tryhtml_default) site is a quick way to host it.
+Still working on this. I don't know how you could attack this, given the sensitive data goes through cookies.
