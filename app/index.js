@@ -6,7 +6,7 @@ function checkQuery() {
         const state = params.get('state');
         status.innerText = 'Found "state" query value ' + state +
             '. Sending authorize response to server...';
-        fetch('/use-csrf-token', {
+        fetch('/catch_response', {
             method: 'POST',
             headers: {
                 'X-AUTHORIZE-RESPONSE': qs
@@ -33,7 +33,7 @@ function checkQuery() {
 }
 
 function setupCSRF(status) {
-    fetch('/get-csrf-token')
+    fetch('/start_login')
         .then(response => {
             if (response.status == 200) {
                 const auth_request = document.cookie

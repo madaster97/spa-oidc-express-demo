@@ -30,7 +30,7 @@ const { Issuer, generators } = require('openid-client');
         }
     }));
 
-    app.get('/get-csrf-token', (req, res) => {
+    app.get('/start_login', (req, res) => {
         const state = generators.state();
         const nonce = generators.nonce();
         const code_verifier = generators.codeVerifier();
@@ -70,13 +70,13 @@ const { Issuer, generators } = require('openid-client');
         })
     }
 
-    app.post('/use-csrf-token', async (req, res) => {
+    app.post('/catch_response', async (req, res) => {
         const state = req.session.state;
         const nonce = req.session.nonce;
         const code_verifier = req.session.code_verifier;
         await destroySession(req); // Clear login session when redeeming
         const authorizeResponse = req.header('X-AUTHORIZE-RESPONSE');
-        if (req.cookies['AUTHORIZE-REQUEST']) {
+        if (req.header('cookie').includes("AUTHORIZE-REQUEST")) {
             res.status(400).json({
                 error: 'invalid_request',
                 error_message: 'Client should clear the "AUTHORIZE-REQUEST" cookie after reading it'
@@ -98,8 +98,8 @@ const { Issuer, generators } = require('openid-client');
                 params,
                 {
                     code_verifier,
-                    state: expectedState,
-                    nonce: expectedNonce
+                    state: state,
+                    nonce: nonce
                 }).then(tokenSet => {
                     const output = {
                         ...tokenSet
