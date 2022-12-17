@@ -1,27 +1,16 @@
-function paramsToObject(entries) {
-    const result = {}
-    for (const [key, value] of entries) { // each 'entry' is a [key, value] tupple
-        result[key] = value;
-    }
-    return result;
-}
-
 function checkQuery() {
     const qs = window.location.search;
     const status = document.getElementById('status');
     if (qs && qs.includes('state=')) {
         const params = new URLSearchParams(qs);
         const state = params.get('state');
-        params.delete('state');
         status.innerText = 'Found "state" query value ' + state +
             '. Sending authorize response to server...';
         fetch('/use-csrf-token', {
             method: 'POST',
             headers: {
-                'X-AUTH-STATE': state,
-                'Content-Type': 'application/json'
+                'X-AUTHORIZE-RESPONSE': qs
             },
-            body: JSON.stringify(paramsToObject(params))
         }).then(response => {
             if (response.status == 200) {
                 return response.json().then(tokenSet => {
@@ -44,17 +33,17 @@ function checkQuery() {
 }
 
 function setupCSRF(status) {
-    // document.cookie="XSRF-AUTH-REQUEST=; Max-Age=0"
     fetch('/get-csrf-token')
         .then(response => {
             if (response.status == 200) {
                 const auth_request = document.cookie
                     .split('; ')
-                    .find((row) => row.startsWith('XSRF-AUTH-REQUEST='))
+                    .find((row) => row.startsWith('AUTHORIZE-REQUEST='))
                     ?.split('=')[1];
                 if (!auth_request) {
-                    status.innerText = 'Could not find auth request in "XSRF-AUTH-REQUEST" cookie';
+                    status.innerText = 'Could not find auth request in "AUTHORIZE-REQUEST" cookie';
                 } else {
+                    document.cookie="AUTHORIZE-REQUEST=; Max-Age=0" // Delete request once loaded
                     const myLink = document.createElement("a");
                     myLink.innerText = 'Login here';
                     myLink.setAttribute('href', decodeURIComponent(auth_request));

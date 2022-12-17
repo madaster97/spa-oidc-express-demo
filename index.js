@@ -53,7 +53,7 @@ const bodyParser = require('body-parser');
                 });
             }
             else {
-                res.cookie('XSRF-AUTH-REQUEST', authorizeRequest, {
+                res.cookie('AUTHORIZE-REQUEST', authorizeRequest, {
                     // TODO, add other props
                     httpOnly: false
                 });
@@ -66,21 +66,22 @@ const bodyParser = require('body-parser');
         const expectedState = req.session.state;
         const expectedNonce = req.session.nonce;
         const code_verifier = req.session.code_verifier;
+        const authorizeResponse = req.header('X-AUTHORIZE-RESPONSE');
         if (!expectedState || !expectedNonce || !code_verifier) {
             res.status(400).json({
                 error: 'server_error',
                 error_message: 'CSRF token missing from session'
             });
-        } else if (!req.body) {
+        } else if (!authorizeResponse) {
             res.status(400).json({
                 error: 'invalid_request',
                 error_message: 'Authorize response missing from request'
-            })            
+            }) 
         } else {
-            const providedState = req.header('X-AUTH-STATE');
+            const params = client.callbackParams(authorizeResponse);
             client.callback(
                 client.metadata.redirect_uris[0],
-                {...req.body, state: providedState},
+                params,
                 {
                     code_verifier,
                     state: expectedState,
@@ -90,13 +91,16 @@ const bodyParser = require('body-parser');
                         ...tokenSet
                     };
                     if (output.access_token) {
-                        output.access_token = 'REDACTED. Use this data on the server only!';
+                        output.access_token = 
+                            'REDACTED. Try creating an API endpoint to proxy requests to the resource server!';
                     }
                     if (output.id_token) {
-                        output.id_token = 'REDACTED. Use this data on the server only!';
+                        output.id_token = 
+                            'REDACTED. Use this to create an authenticated user session on the server!';
                     }
                     if (output.refresh_token) {
-                        output.refresh_token = 'REDACTED. Use this data on the server only!';
+                        output.refresh_token = 
+                            'REDACTED. Do not expose refresh tokens to the client!';
                     }
                     res.json(output);
                 }).catch(err => {
