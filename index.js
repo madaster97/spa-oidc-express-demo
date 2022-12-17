@@ -1,7 +1,6 @@
 const express = require('express');
 const session = require('express-session');
 const { Issuer, generators } = require('openid-client');
-const bodyParser = require('body-parser');
 
 (async () => {
     const issuer = await Issuer.discover(process.env.ISSUER_BASE_URL);
@@ -62,21 +61,36 @@ const bodyParser = require('body-parser');
         });
     });
 
-    app.post('/use-csrf-token', bodyParser.json({type: 'application/json'}), async (req, res) => {
-        const expectedState = req.session.state;
-        const expectedNonce = req.session.nonce;
+    async function destroySession(req) {
+        return new Promise((resolve, reject) => {
+            req.session.destroy(err => {
+                if (err) reject(err)
+                else resolve()
+            });
+        })
+    }
+
+    app.post('/use-csrf-token', async (req, res) => {
+        const state = req.session.state;
+        const nonce = req.session.nonce;
         const code_verifier = req.session.code_verifier;
+        await destroySession(req); // Clear login session when redeeming
         const authorizeResponse = req.header('X-AUTHORIZE-RESPONSE');
-        if (!expectedState || !expectedNonce || !code_verifier) {
+        if (req.cookies['AUTHORIZE-REQUEST']) {
+            res.status(400).json({
+                error: 'invalid_request',
+                error_message: 'Client should clear the "AUTHORIZE-REQUEST" cookie after reading it'
+            })
+        } else if (!state || !nonce || !code_verifier) {
             res.status(400).json({
                 error: 'server_error',
-                error_message: 'CSRF token missing from session'
+                error_message: 'CSRF token(s) missing from session'
             });
         } else if (!authorizeResponse) {
             res.status(400).json({
                 error: 'invalid_request',
                 error_message: 'Authorize response missing from request'
-            }) 
+            })
         } else {
             const params = client.callbackParams(authorizeResponse);
             client.callback(
@@ -91,15 +105,15 @@ const bodyParser = require('body-parser');
                         ...tokenSet
                     };
                     if (output.access_token) {
-                        output.access_token = 
+                        output.access_token =
                             'REDACTED. Try creating an API endpoint to proxy requests to the resource server!';
                     }
                     if (output.id_token) {
-                        output.id_token = 
+                        output.id_token =
                             'REDACTED. Use this to create an authenticated user session on the server!';
                     }
                     if (output.refresh_token) {
-                        output.refresh_token = 
+                        output.refresh_token =
                             'REDACTED. Do not expose refresh tokens to the client!';
                     }
                     res.json(output);
